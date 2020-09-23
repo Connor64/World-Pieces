@@ -10,18 +10,46 @@ public class MarchingBlock {
 
     public LandType landType;
     public Vector3 position;
-    public List<int> cornersEncapsulated;
+    public HashSet<int> cornersExposed;
+    private float[] cornerValues;
 
-    public MarchingBlock(LandType landType, Vector3 position, List<int> cornersEncapsulated) {
+    public MarchingBlock[] surroundingVoxels;
+
+    public MarchingBlock(LandType landType, Vector3 position, HashSet<int> cornersExposed) {
         this.landType = landType;
         this.position = position;
-        this.cornersEncapsulated = cornersEncapsulated;
+        this.cornersExposed = cornersExposed;
     }
 
     public MarchingBlock(LandType landType, Vector3 position) {
         this.landType = landType;
         this.position = position;
-        cornersEncapsulated = null;
+        cornersExposed = null;
     }
 
+    void setCornerValues(float[] values) {
+        cornerValues = values;
+    }
+
+    float[] getCornerValues() {
+        return cornerValues;
+    }
+
+    void reEvaluateCorners(float threshold) {
+        cornersExposed.Clear();
+        for (int i = 0; i < 8; i++) {
+            if (cornerValues[i] < threshold) {
+                cornersExposed.Add(i);
+            }
+        }
+    }
+
+    void exposeCorner(int corner) {
+        if (landType != LandType.Air && cornersExposed.Count < 8) {
+            cornersExposed.Add(corner);
+        }
+        if (cornersExposed.Count >= 8) {
+            landType = LandType.Air;
+        }
+    }
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2806908246944296023}
   - component: {fileID: 6927578928151248870}
   - component: {fileID: 5349501454205872702}
+  - component: {fileID: -3312798825771477885}
   m_Layer: 0
   m_Name: SmoothWP_Pref
   m_TagString: Untagged
@@ -112,4 +113,21 @@ MonoBehaviour:
   materials:
   - {fileID: 2100000, guid: 2f25fabb34a4ee34fbedf5c8a36ee3a0, type: 2}
   cube: {fileID: 0}
+  cubePos: {x: 0, y: 0, z: 0}
+  readCorners: 0
+  voxelScalar: 0
   size: {x: 0, y: 0, z: 0}
+--- !u!64 &-3312798825771477885
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5424950857825261801}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}

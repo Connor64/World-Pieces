@@ -16,9 +16,15 @@ public class PlayerController : MonoBehaviour {
     private bool placePause = false;
     private bool jumped = false;
     private Vector2 crosshair;
+    private bool grounded = false;
 
     public GameObject cube;
     public Material material;
+
+    private void Awake() {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 120;
+    }
 
     void Start() {
         rb = GetComponent<Rigidbody>();
@@ -28,6 +34,11 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
+        grounded = isGrounded();
+        if (grounded) {
+            jumped = false;
+        }
+
         cameraRotation();
         if (Input.GetMouseButtonDown(0)) {
             blockInteract(true);
@@ -62,6 +73,8 @@ public class PlayerController : MonoBehaviour {
         //float sideMovement = Input.GetAxis("Horizontal");
         //Vector3 movement = new Vector3(sideMovement, 0, forwardMovement);
         //rb.AddForce(movement * 100 * playerSpeed * Time.fixedDeltaTime);
+
+
         if (Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S)) {
             rb.AddForce(transform.forward * playerSpeed);
         } else if (Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W)) {
@@ -74,9 +87,13 @@ public class PlayerController : MonoBehaviour {
             rb.AddForce(transform.right * playerSpeed);
         }
 
-        if (Input.GetKey(KeyCode.Space) && isGrounded()) {
+        if (Input.GetKey(KeyCode.Space) && grounded) {
             rb.AddForce(transform.up * jumpSpeed);
             jumped = true;
+        }
+
+        if (!jumped && isGrounded() && grounded) {
+            rb.AddForce(transform.up * 7.5f);
         }
 
         Vector3 currentVelocity = rb.velocity;
@@ -84,6 +101,22 @@ public class PlayerController : MonoBehaviour {
             rb.velocity = currentVelocity.normalized * speedLimit;
             if (currentVelocity.y < 0.01f) {
                 rb.velocity = new Vector3(rb.velocity.x, currentVelocity.y, rb.velocity.z);
+            }
+        }
+
+        // reloads mesh you are looking at (for debugging)
+        if (Input.GetKeyDown(KeyCode.K)) {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(crosshair);
+            if (Physics.Raycast(ray, out hit, 5)) {
+                GameObject swpObject = hit.collider.gameObject;
+                if (swpObject.layer == 8) {
+                    print("test");
+                    SmoothWP swp = swpObject.GetComponent<SmoothWP>();
+                    //swp.setup();
+                    swp.renderMesh();
+                    swp.finalize();
+                }
             }
         }
     }
@@ -97,78 +130,81 @@ public class PlayerController : MonoBehaviour {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(crosshair);
         if (Physics.Raycast(ray, out hit, 5)) {
-            if (hit.collider.gameObject.layer == 8) {
+            GameObject swpObject = hit.collider.gameObject;
+            if (swpObject.layer == 8) {
                 if (breaking && !breakPause) {
-                    hit.collider.gameObject.GetComponent<Cube>().destoryCube();
-                } else if (!breaking && !placePause) {
-                    //print(hit.triangleIndex);
-                    int triangle = hit.triangleIndex;
-                    //if (triangle == 0 || triangle == 1) {
-                    //    placeBlock(hit.collider.gameObject.transform.position - transform.forward);
-                    //} else if (triangle == 4 || triangle == 7) {
-                    //    placeBlock(hit.collider.gameObject.transform.position + transform.right);
-                    //} else if (triangle == 10 || triangle == 11) {
-                    //    placeBlock(hit.collider.gameObject.transform.position + transform.forward);
-                    //} else if (triangle == 8 || triangle == 2) {
-                    //    placeBlock(hit.collider.gameObject.transform.position - transform.forward);
-                    //} else if (triangle == 3 || triangle == 6) {
-                    //    placeBlock(hit.collider.gameObject.transform.position + transform.up);
-                    //} else if (triangle == 5 || triangle == 9) {
-                    //    placeBlock(hit.collider.gameObject.transform.position - transform.up);
-                    //}
-                    //Vector3 position = new Vector3(Mathf.FloorToInt(hit.transform.position.x), Mathf.FloorToInt(hit.transform.position.y), Mathf.FloorToInt(hit.transform.position.z));
                     int _x = Mathf.FloorToInt(hit.point.x);
                     int _y = Mathf.FloorToInt(hit.point.y);
                     int _z = Mathf.FloorToInt(hit.point.z);
 
-                    placeBlock(_x, _y, _z, hit.collider.gameObject.GetComponent<WorldPiece>());
-                    //switch (hit.triangleIndex) {
-                    //    case 0:
-                    //    case 1:
-                    //        placeBlock(hit.collider.gameObject.transform.position - Vector3.forward);
-                    //        //print(hit.collider.gameObject.transform.position);
-                    //        break;
-                    //    case 4:
-                    //    case 7:
-                    //        placeBlock(hit.collider.gameObject.transform.position + Vector3.right);
-                    //        //print(hit.collider.gameObject.transform.position);
-                    //        break;
-                    //    case 10:
-                    //    case 11:
-                    //        placeBlock(hit.collider.gameObject.transform.position + Vector3.forward);
-                    //        //print(hit.collider.gameObject.transform.position);
-                    //        break;
-                    //    case 8:
-                    //    case 2:
-                    //        placeBlock(hit.collider.gameObject.transform.position - Vector3.right);
-                    //        //print(hit.collider.gameObject.transform.position);
-                    //        break;
-                    //    case 3:
-                    //    case 6:
-                    //        placeBlock(hit.collider.gameObject.transform.position + Vector3.up);
-                    //        //print(hit.collider.gameObject.transform.position);
-                    //        break;
-                    //    case 5:
-                    //    case 9:
-                    //        placeBlock(hit.collider.gameObject.transform.position - Vector3.up);
-                    //        //print(hit.collider.gameObject.transform.position);
-                    //        break;
-                    //    default:
-                    //        Debug.LogError("Unable to find Triangle Index at: " + hit.collider.gameObject.transform.position);
-                    //        break;
-                    //}
-                    ////placeBlock(hit.collider.gameObject.transform.position + transform.up);
+                    destroyVoxel(hit.point.x - Mathf.FloorToInt(swpObject.transform.position.x), hit.point.y, hit.point.z - Mathf.FloorToInt(swpObject.transform.position.z), hit.collider.gameObject.GetComponent<SmoothWP>());
+                } else if (!breaking && !placePause) {
+                    int _x = Mathf.FloorToInt(hit.point.x);
+                    int _y = 1 + Mathf.FloorToInt(hit.point.y);
+                    int _z = Mathf.FloorToInt(hit.point.z);
+
+                    placeBlock(hit.point.x - Mathf.FloorToInt(swpObject.transform.position.x), hit.point.y, _z - Mathf.FloorToInt(swpObject.transform.position.z), swpObject.GetComponent<SmoothWP>());
                 }
             }
         }
     }
+    void destroyVoxel(float x, float y, float z, SmoothWP swp) {
+        int _x = Mathf.FloorToInt(x);
+        int _y = Mathf.FloorToInt(y);
+        int _z = Mathf.FloorToInt(z);
+        float scalar = swp.voxelScalar;
+        Vector3[] voxelCorners = new Vector3[] {
+            new Vector3(_x, _y, _z),
+            new Vector3(_x + scalar, _y, _z),
+            new Vector3(_x, _y + scalar, _z),
+            new Vector3(_x + scalar, _y + scalar, _z),
 
-    void placeBlock(int x, int y, int z, WorldPiece wp) {
-        print(new Vector3(x, y, z));
-        wp.data[x, z, y] = new Block(BlockType.Dirt, new Vector3(x, y, z));
-        wp.renderMesh();
-        wp.finalize();
-        //var cubeObject = GameObject.Instantiate(cube).GetComponent<Cube>();
-        //cubeObject.generateCube(position, material);
+            new Vector3(_x + scalar, _y, _z + scalar),
+            new Vector3(_x + scalar, _y + scalar, _z + scalar),
+            new Vector3(_x, _y, _z + scalar),
+            new Vector3(_x, _y + scalar, _z + scalar)
+        };
+        HashSet<int> corners = swp.data[_x, _z, _y].cornersExposed;
+        Vector3 cursorPosition = new Vector3(x, y, z);
+
+        int cornerSelected = 10;
+
+        float distance = 1;
+
+        for (int i = 0; i < voxelCorners.Length; i++) {
+            float newDistance = Vector3.Distance(voxelCorners[i], cursorPosition);
+            if (newDistance < distance && !corners.Contains(i)) {
+                cornerSelected = i;
+                distance = newDistance;
+            }
+        }
+
+        if (cornerSelected != 10) {
+            TerrainModifier.removeMoreCorners(_x, _y, _z, cornerSelected, swp);
+        } else {
+            print("No corner able to be selected");
+        }
+        swp.renderMesh();
+        swp.finalize();
+        swp.updatePhysics();
+    }
+
+
+    void placeBlock(float x, float y, float z, SmoothWP swp) {
+        int _x = Mathf.FloorToInt(x);
+        int _y = Mathf.FloorToInt(y);
+        int _z = Mathf.FloorToInt(z);
+
+        if (swp.data[_x, _z, _y].landType == LandType.Air) {
+            print(new Vector3(x, y, z));
+            swp.data[_x, _z, _y].landType = LandType.Dirt;
+            swp.data[_x, _z, _y].position = new Vector3(x, y, z);
+            swp.data[_x, _z, _y].cornersExposed = new HashSet<int> { 1, 3, 7, 5 };
+            //swp.setup();
+            swp.renderMesh();
+            swp.finalize();
+        } else {
+            print("NOT AIR");
+        }
     }
 }

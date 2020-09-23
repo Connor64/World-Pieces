@@ -7,11 +7,18 @@ public class SmoothWP : MonoBehaviour {
     public Material[] materials;
     public GameObject cube;
     public MarchingBlock[,,] data;
+    //public float[,,,] cornerValues;
+    public Vector3 cubePos;
+    public bool readCorners = false;
+    public float voxelScalar;
+    public Vector3 size;
+
     private Mesh mesh;
     private List<Vector3> verts = new List<Vector3>();
     private List<int> tris = new List<int>();
-    public Vector3 cubePos;
-    public bool readCorners = false;
+    private Rigidbody rb;
+    private MeshCollider mc;
+
     private Vector3[] edges = new Vector3[] {
         new Vector3(0.5f, 0, 1),
         new Vector3(1, 0, 0.5f),
@@ -26,13 +33,13 @@ public class SmoothWP : MonoBehaviour {
         new Vector3(0, 0.5f, 1),
         new Vector3(1, 0.5f, 1f),
         new Vector3(1, 0.5f, 0),
-        new Vector3(0, 0.5f, 0),};
+        new Vector3(0, 0.5f, 0),
+    };
 
-    public Vector3 size;
 
     void Update() {
         if (readCorners) {
-            foreach (int i in data[(int)cubePos.x, (int)cubePos.z, (int)cubePos.y].cornersEncapsulated) {
+            foreach (int i in data[(int)cubePos.x, (int)cubePos.z, (int)cubePos.y].cornersExposed) {
                 print(i);
             }
             readCorners = false;
@@ -47,10 +54,8 @@ public class SmoothWP : MonoBehaviour {
     }
 
     public void finalize() {
+        //mesh.Clear(false);
         mesh.vertices = verts.ToArray();
-        //for (int i = 0; i < tris.Count; i++) {
-        //    print(tris[i]);
-        //}
         mesh.triangles = tris.ToArray();
 
         mesh.Optimize();
@@ -59,93 +64,84 @@ public class SmoothWP : MonoBehaviour {
     }
 
     public void initialPhysicsSetup() {
-        gameObject.AddComponent<MeshCollider>();
-
-        gameObject.AddComponent<Rigidbody>();
-        Rigidbody rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
+        mc = GetComponent<MeshCollider>();
+        mc.sharedMesh = mesh;
         rb.isKinematic = true;
         rb.useGravity = false;
     }
 
+    public void updatePhysics() {
+        mc.sharedMesh = mesh;
+    }
+
     public void renderMesh() {
-        mesh.Clear();
+        mesh.Clear(false);
+        verts.Clear();
+        tris.Clear();
         for (int x = 0; x < size.x; x++) {
+            float scaledX = x * voxelScalar;
             for (int z = 0; z < size.z; z++) {
+                float scaledZ = z * voxelScalar;
                 for (int y = 0; y < size.y; y++) {
-                    if (data[x, z, y].landType != LandType.Air && data[x, z, y].cornersEncapsulated != null) {
-                        List<int> corners = data[x, z, y].cornersEncapsulated;
+                    float scaledY = y * voxelScalar;
+                    if (data[x, z, y].landType != LandType.Air && data[x, z, y].cornersExposed != null) {
+                        HashSet<int> corners = data[x, z, y].cornersExposed;
                         int triIndex = 0;
-                        for (int i = 0; i < corners.Count; i++) {
-                            if (corners[i] == 1) {
-                                triIndex += 128;
-                            }
-                            if (corners[i] == 3) {
-                                triIndex += 64;
-                            }
-                            if (corners[i] == 5) {
-                                triIndex += 32;
-                            }
-                            if (corners[i] == 7) {
-                                triIndex += 16;
-                            }
-                            if (corners[i] == 0) {
-                                triIndex += 8;
-                            }
-                            if (corners[i] == 2) {
-                                triIndex += 4;
-                            }
-                            if (corners[i] == 4) {
-                                triIndex += 2;
-                            }
-                            if (corners[i] == 6) {
-                                triIndex += 1;
+                        foreach (int i in corners) {
+                            switch (i) {
+                                case 1:
+                                    triIndex += 128;
+                                    break;
+                                case 3:
+                                    triIndex += 64;
+                                    break;
+                                case 5:
+                                    triIndex += 32;
+                                    break;
+                                case 7:
+                                    triIndex += 16;
+                                    break;
+                                case 0:
+                                    triIndex += 8;
+                                    break;
+                                case 2:
+                                    triIndex += 4;
+                                    break;
+                                case 4:
+                                    triIndex += 2;
+                                    break;
+                                case 6:
+                                    triIndex += 1;
+                                    break;
                             }
                         }
-                        //if (triIndex > 255) {
-                        //    foreach (int i in corners) {
-                        //        print(i);
-                        //    }
-                        //    print(triIndex);
-                        //}
-                        addVertices(new Vector3(x, y, z), triangulationTable[triIndex]);
-                        //foreach (int i in triangulationTable[triIndex]) {
-                        //    tris.Add(verts.Count);
-                        //}
-                        //print("added tris");
+                        if (triIndex > 255 || triIndex < 0) {
+                            print(triIndex);
+                        }
+                        addVertices(new Vector3(scaledX, scaledY, scaledZ), triangulationTable[triIndex]);
                     }
                 }
             }
         }
     }
 
-    //private Vector3 getVertices(Vector3 position, List<int> corners) {
-
-    //}
-
     void addVertices(Vector3 position, int[] triStuff) {
-        //for (int i = triStuff.Length - 1; i >= 0; i--) {
-        //    verts.Add(new Vector3(edges[triStuff[i]].x + position.x, edges[triStuff[i]].y + position.y, edges[triStuff[i]].z + position.z));
-        //    tris.Add(verts.Count - 1);
-        //}
-
         foreach (int i in triStuff) {
             verts.Add(new Vector3(edges[i].x + position.x, edges[i].y + position.y, edges[i].z + position.z));
-            //print(verts[verts.Count - 1]);
             tris.Add(verts.Count - 1);
         }
     }
 
-    float remap(float value, float low1, float high1, float low2, float high2) {
-        return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
-    }
-
-    void setBlockData(int x, int y, int z) {
-
-    }
-
-    public void setSize(Vector3 size) {
+    public void setSize(Vector3 size, float voxelScalar) {
         this.size = size;
+        this.voxelScalar = voxelScalar;
         data = new MarchingBlock[(int)size.x, (int)size.z, (int)size.y];
+        // Sets the size of the voxel data array for the entire world piece
+        for (int i = 0; i < edges.Length; i++) {
+            edges[i] = Vector3.Scale(edges[i], new Vector3(voxelScalar, voxelScalar, voxelScalar));
+            // Changes the sizes of the edges based on the voxel scalar
+        }
     }
 
     int[][] triangulationTable = new int[][] {
