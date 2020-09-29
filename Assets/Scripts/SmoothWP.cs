@@ -36,6 +36,18 @@ public class SmoothWP : MonoBehaviour {
         new Vector3(0, 0.5f, 0),
     };
 
+    private Dictionary<int, int[]> cornerEdgeIndex = new Dictionary<int, int[]>() {
+        {0, new int[]{2, 3, 11}},
+        {1, new int[]{6, 7, 11}},
+        {2, new int[]{1, 2, 10}},
+        {3, new int[]{5, 6, 10}},
+
+        {4, new int[]{2, 3, 11}},
+        {5, new int[]{2, 3, 11}},
+        {6, new int[]{2, 3, 11}},
+        {7, new int[]{2, 3, 11}},
+    };
+
 
     void Update() {
         if (readCorners) {
@@ -119,18 +131,107 @@ public class SmoothWP : MonoBehaviour {
                         if (triIndex > 255 || triIndex < 0) {
                             print(triIndex);
                         }
-                        addVertices(new Vector3(scaledX, scaledY, scaledZ), triangulationTable[triIndex]);
+                        addVertices(new Vector3(scaledX, scaledY, scaledZ), triangulationTable[triIndex], corners);
                     }
                 }
             }
         }
     }
 
-    void addVertices(Vector3 position, int[] triStuff) {
+    void addVertices(Vector3 position, int[] triStuff, HashSet<int> corners) {
+        //Vector3[] edgeStuff = new Vector3[edges.Length];
+        //for (int i = 0; i < edges.Length; i++) {
+        //    edgeStuff[i] = edges[i];
+        //}
+        //foreach (int c in corners) {
+        //    edgeStuff[c] += absoluteInterpolation(c, corners);
+        //}
+
+        //foreach (int i in triStuff) {
+        //    verts.Add(new Vector3(edgeStuff[i].x + position.x, edgeStuff[i].y + position.y, edgeStuff[i].z + position.z));
+        //    tris.Add(verts.Count - 1);
+        //}
+
         foreach (int i in triStuff) {
             verts.Add(new Vector3(edges[i].x + position.x, edges[i].y + position.y, edges[i].z + position.z));
             tris.Add(verts.Count - 1);
         }
+    }
+
+    Vector3 absoluteInterpolation(int vertex, HashSet<int> corners) {
+        Vector3 neighborsExposed = new Vector3(0, 0, 0);
+        int yNeigh;
+        int xNeigh;
+        int zNeigh;
+
+        if (vertex % 2 == 1) {
+            // 0, 2, 4, 6
+            yNeigh = vertex - 1;
+            if (!corners.Contains(yNeigh)) {
+                neighborsExposed.y = -0.5f;
+            }
+        } else {
+            // 1, 3, 5, 7
+            yNeigh = vertex + 1;
+            if (!corners.Contains(yNeigh)) {
+                neighborsExposed.y = 0.5f;
+            }
+        }
+
+        if (vertex > 3) {
+            // 4, 5, 6, 7
+            if (vertex < 6) {
+                // 4 and 5
+                zNeigh = vertex - 2;
+                xNeigh = vertex + 2;
+                if (!corners.Contains(xNeigh)) {
+                    neighborsExposed.x = 0.5f;
+                }
+            } else {
+                // 6 and 7
+                zNeigh = vertex - 6;
+                xNeigh = vertex - 2;
+                if (!corners.Contains(xNeigh)) {
+                    neighborsExposed.x = -0.5f;
+                }
+            }
+            if (!corners.Contains(zNeigh)) {
+                neighborsExposed.z = -0.5f;
+            }
+        } else {
+            // 0, 1, 2, 3
+            if (vertex > 1) {
+                // 2 and 3
+                zNeigh = vertex + 2;
+                xNeigh = vertex - 2;
+                if (!corners.Contains(xNeigh)) {
+                    neighborsExposed.x = 0.5f;
+                }
+            } else {
+                // 0 and 1
+                zNeigh = vertex + 6;
+                xNeigh = vertex + 2;
+                if (!corners.Contains(xNeigh)) {
+                    neighborsExposed.x = -0.5f;
+                }
+            }
+            if (!corners.Contains(zNeigh)) {
+                neighborsExposed.z = 0.5f;
+            }
+        }
+
+        //if (vertex == 0 || vertex == 1 || vertex == 6 || vertex == 7) {
+        //    xNeigh = vertex + 2;
+        //    if (!corners.Contains(xNeigh)) {
+        //        neighborsExposed.x = -0.5f;
+        //    }
+        //} else {
+        //    xNeigh = vertex - 2;
+        //    if (!corners.Contains(xNeigh)) {
+        //        neighborsExposed.x = 0.5f;
+        //    }
+        //}
+        return neighborsExposed;
     }
 
     public void setSize(Vector3 size, float voxelScalar) {

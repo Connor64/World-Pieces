@@ -6,14 +6,14 @@ public class TerrainModifier {
 
     private TerrainGenerator terrainGen = TerrainGenerator.instance;
 
-    public static MarchingBlock removeCorners(int x, int y, int z, int corner, SmoothWP swp) {
+    public static MarchingBlock removeCornersOLD(int x, int y, int z, int corner, SmoothWP swp) {
         MarchingBlock block = swp.data[x, z, y];
         HashSet<int> newCorners = block.cornersExposed;
         newCorners.Remove(corner);
         return new MarchingBlock(block.landType, block.position, newCorners);
     }
 
-    public static void removeMoreCorners(int x, int y, int z, int corner, SmoothWP swp) {
+    public static void removeCorners(int x, int y, int z, int corner, SmoothWP swp) {
         //List<int> corners
         switch (corner) {
             case 0:

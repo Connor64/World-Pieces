@@ -168,7 +168,6 @@ public class PlayerController : MonoBehaviour {
         Vector3 cursorPosition = new Vector3(x, y, z);
 
         int cornerSelected = 10;
-
         float distance = 1;
 
         for (int i = 0; i < voxelCorners.Length; i++) {
@@ -180,7 +179,7 @@ public class PlayerController : MonoBehaviour {
         }
 
         if (cornerSelected != 10) {
-            TerrainModifier.removeMoreCorners(_x, _y, _z, cornerSelected, swp);
+            TerrainModifier.removeCorners(_x, _y, _z, cornerSelected, swp);
         } else {
             print("No corner able to be selected");
         }

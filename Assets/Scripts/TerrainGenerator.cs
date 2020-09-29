@@ -8,23 +8,20 @@ public class TerrainGenerator : MonoBehaviour {
     private Dictionary<SmoothWP, GameObject> smoothWPs = new Dictionary<SmoothWP, GameObject>();
     public GameObject wpPref;
     public GameObject smoothWPPref;
-    PerlinNoiseGen perlinNoise;
     public Vector3 worldPieceSize;
     public Vector2 wpAmount;
-    public float perlin2DMultiplier = 2f;
-    public float perlin3DMultiplier = 2f;
-    public float perlin3DThreshold;
-    public float perlin2DScalar = 0.15f;
-    public float perlin3DScalar = 0.15f;
-    public float heightBuffer = 32f;
+    public float perlin2DMultiplier = 30f;
+    public float perlin3DMultiplier = 0.05f;
+    public float perlin3DThreshold = 0.38f;
+    public float perlin2DScalar = 0.025f;
+    public float perlin3DScalar = 0.079f;
+    public float heightBuffer = 64f;
+    public float voxelScalar = 1f;
 
     public static TerrainGenerator instance;
 
-    public float voxelScalar = 1f;
-
     public bool regenerate = false;
-
-    public GameObject thingy;
+    // used during runtime to regenerate the chunk for testing. Automatically reset once enabled
 
     public HashSet<int> testCorners;
 
@@ -34,7 +31,6 @@ public class TerrainGenerator : MonoBehaviour {
         } else {
             Destroy(gameObject);
         }
-        perlinNoise = PerlinNoiseGen.instance;
         if (worldPieceSize == Vector3.one) {
             GameObject swpObject = Instantiate(smoothWPPref);
             //swpObject.transform.position = position;
@@ -47,7 +43,6 @@ public class TerrainGenerator : MonoBehaviour {
             swp.renderMesh();
             swp.finalize();
             swp.initialPhysicsSetup();
-            thingy = swpObject;
             smoothWPs.Add(swp, swpObject);
         } else {
             for (int x = 0; x < wpAmount.x; x++) {
@@ -181,7 +176,6 @@ public class TerrainGenerator : MonoBehaviour {
         swp.renderMesh();
         swp.finalize();
         swp.initialPhysicsSetup();
-        thingy = swpObject;
         smoothWPs.Add(swp, swpObject);
     }
 }

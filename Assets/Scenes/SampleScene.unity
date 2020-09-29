@@ -961,12 +961,12 @@ PrefabInstance:
     - target: {fileID: 5155192074115261550, guid: 8e11d41c19f85d7498a9ab13563f2e70,
         type: 3}
       propertyPath: wpAmount.x
-      value: 1
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5155192074115261550, guid: 8e11d41c19f85d7498a9ab13563f2e70,
         type: 3}
       propertyPath: wpAmount.y
-      value: 1
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5155192074115261550, guid: 8e11d41c19f85d7498a9ab13563f2e70,
         type: 3}

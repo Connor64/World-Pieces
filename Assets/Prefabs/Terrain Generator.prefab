@@ -43,4 +43,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a81d747372f7a574aabd86ad6e08bb5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wpPref: {fileID: 0}
+  wpPref: {fileID: 8553749631965372456, guid: 93cf8afa7b0f743449e4a7a6cfa293f3, type: 3}
+  smoothWPPref: {fileID: 5424950857825261801, guid: 2725f0accf9e2d249bf7b453a7124fa1,
+    type: 3}
+  worldPieceSize: {x: 16, y: 128, z: 16}
+  wpAmount: {x: 4, y: 4}
+  perlin2DMultiplier: 30
+  perlin3DMultiplier: 0.05
+  perlin3DThreshold: 0.38
+  perlin2DScalar: 0.025
+  perlin3DScalar: 0.079
+  heightBuffer: 64
+  voxelScalar: 1
+  regenerate: 0
+  thingy: {fileID: 0}
