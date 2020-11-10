@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -22,8 +23,8 @@ public class PlayerController : MonoBehaviour {
     public Material material;
 
     private void Awake() {
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 120;
+        //QualitySettings.vSyncCount = 0;
+        //Application.targetFrameRate = 120;
     }
 
     void Start() {
@@ -33,13 +34,14 @@ public class PlayerController : MonoBehaviour {
         _yRot = 0.0f;
     }
 
-    void Update() {
+    void LateUpdate() {
         grounded = isGrounded();
         if (grounded) {
             jumped = false;
         }
 
         cameraRotation();
+
         if (Input.GetMouseButtonDown(0)) {
             blockInteract(true);
         } else if (Input.GetMouseButtonUp(0)) {
@@ -58,8 +60,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     void cameraRotation() {
-        float mouseX = Input.GetAxis("Mouse X") * lookSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * lookSensitivity * Time.fixedDeltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity * Time.fixedDeltaTime;
         _yRot -= mouseY;
         _yRot = Mathf.Clamp(_yRot, -90, 90);
         Vector3 currentRotation = Camera.main.transform.rotation.eulerAngles;
@@ -130,20 +132,25 @@ public class PlayerController : MonoBehaviour {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(crosshair);
         if (Physics.Raycast(ray, out hit, 5)) {
-            GameObject swpObject = hit.collider.gameObject;
-            if (swpObject.layer == 8) {
+            GameObject awpObject = hit.collider.gameObject;
+            if (awpObject.layer == 8) {
                 if (breaking && !breakPause) {
                     int _x = Mathf.FloorToInt(hit.point.x);
                     int _y = Mathf.FloorToInt(hit.point.y);
                     int _z = Mathf.FloorToInt(hit.point.z);
 
-                    destroyVoxel(hit.point.x - Mathf.FloorToInt(swpObject.transform.position.x), hit.point.y, hit.point.z - Mathf.FloorToInt(swpObject.transform.position.z), hit.collider.gameObject.GetComponent<SmoothWP>());
+                    //destroyVoxel(hit.point.x - Mathf.FloorToInt(swpObject.transform.position.x), hit.point.y, hit.point.z - Mathf.FloorToInt(swpObject.transform.position.z), hit.collider.gameObject.GetComponent<SmoothWP>());
+                    string cornerValues = "";
+                    foreach (int thingy in awpObject.GetComponent<AngularWP>().voxelData[_x - Mathf.FloorToInt(awpObject.transform.position.x), _z - Mathf.FloorToInt(awpObject.transform.position.z), _y].cornersExposed) {
+                        cornerValues += thingy + ", ";
+                    }
+                    print(cornerValues);
                 } else if (!breaking && !placePause) {
                     int _x = Mathf.FloorToInt(hit.point.x);
                     int _y = 1 + Mathf.FloorToInt(hit.point.y);
                     int _z = Mathf.FloorToInt(hit.point.z);
 
-                    placeBlock(hit.point.x - Mathf.FloorToInt(swpObject.transform.position.x), hit.point.y, _z - Mathf.FloorToInt(swpObject.transform.position.z), swpObject.GetComponent<SmoothWP>());
+                    placeBlock(hit.point.x - Mathf.FloorToInt(awpObject.transform.position.x), hit.point.y, _z - Mathf.FloorToInt(awpObject.transform.position.z), awpObject.GetComponent<SmoothWP>());
                 }
             }
         }

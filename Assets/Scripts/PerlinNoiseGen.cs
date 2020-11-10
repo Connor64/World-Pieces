@@ -62,26 +62,30 @@ public class PerlinNoiseGen {
         }
     }
 
-    public static float[] marchingPerlin3D(float x, float y, float z, float scalar, float multiplier) {
-        float[] perlins = new float[] {
-            perlin3D(x, y, z, scalar, multiplier),
-            perlin3D(x, y + 1, z, scalar, multiplier),
-            perlin3D(x + 1, y, z, scalar, multiplier),
-            perlin3D(x + 1, y + 1, z, scalar, multiplier),
+    public static float[] marchingPerlin3D(float x, float y, float z, float scalar, float multiplier, Vector3 offset) {
+        float _x = x + offset.x;
+        float _y = y + offset.y;
+        float _z = z + offset.z;
 
-            perlin3D(x + 1, y, z + 1, scalar, multiplier),
-            perlin3D(x + 1, y + 1, z + 1, scalar, multiplier),
-            perlin3D(x, y, z + 1, scalar, multiplier),
-            perlin3D(x, y + 1, z + 1, scalar, multiplier),
+        float[] perlins = new float[] {
+            perlin3D(_x, _y, _z, scalar, multiplier),
+            perlin3D(_x, _y + 1, _z, scalar, multiplier),
+            perlin3D(_x + 1, _y, _z, scalar, multiplier),
+            perlin3D(_x + 1, _y + 1, _z, scalar, multiplier),
+
+            perlin3D(_x + 1, _y, _z + 1, scalar, multiplier),
+            perlin3D(_x + 1, _y + 1, _z + 1, scalar, multiplier),
+            perlin3D(_x, _y, _z + 1, scalar, multiplier),
+            perlin3D(_x, _y + 1, _z + 1, scalar, multiplier),
         };
         return perlins;
     }
 
-    public static float[] marchingPerlin2D(float x, float z, float scalar, bool multiply) {
-        float _x = x * scalar;
-        float _z = z * scalar;
-        float _x2 = (x + 1) * scalar;
-        float _z2 = (z + 1) * scalar;
+    public static float[] marchingPerlin2D(float x, float z, float scalar, bool multiply, Vector2 offset) {
+        float _x = (x + offset.x) * scalar;
+        float _z = (z + offset.y) * scalar;
+        float _x2 = (x + 1 + offset.x) * scalar;
+        float _z2 = (z + 1 + offset.y) * scalar;
 
         float XZ = Mathf.PerlinNoise(_x, _z);
         float XZ2 = Mathf.PerlinNoise(_x2, _z);

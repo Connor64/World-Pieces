@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc98fc4db4977f84d98866f1c0ee6fd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lookSensitivity: 600
+  lookSensitivity: 300
   playerSpeed: 150
   jumpSpeed: 300
   speedLimit: 2
@@ -1028,6 +1028,12 @@ PrefabInstance:
       propertyPath: voxelScalar
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5155192074115261550, guid: 8e11d41c19f85d7498a9ab13563f2e70,
+        type: 3}
+      propertyPath: angularWPPref
+      value: 
+      objectReference: {fileID: 4652507530260720746, guid: 80abcce28aee2e74f92c714e1de265ec,
+        type: 3}
     - target: {fileID: 5834712402674484229, guid: 8e11d41c19f85d7498a9ab13563f2e70,
         type: 3}
       propertyPath: m_LocalPosition.x
