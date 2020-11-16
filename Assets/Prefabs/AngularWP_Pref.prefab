@@ -131,3 +131,4 @@ MonoBehaviour:
   readCorners: 0
   voxelScalar: 0
   size: {x: 0, y: 0, z: 0}
+  position: {x: 0, y: 0, z: 0}

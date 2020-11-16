@@ -35,13 +35,13 @@ public class TerrainGenerator : MonoBehaviour {
     public static TerrainGenerator instance;
     public static List<AngularWP> renderList;
     private bool threadRunning = false;
+    private Thread myThread;
 
     public bool regenerate = false;
     // Used during runtime to regenerate the chunk for debugging/testing. Automatically reset once enabled
 
     public HashSet<int> testCorners;
     private Vector2 perlinOffset;
-    Thread myThread;
 
     void Start() {
         renderList = new List<AngularWP>();

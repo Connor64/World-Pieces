@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour {
 
     void Start() {
         rb = GetComponent<Rigidbody>();
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
         crosshair = new Vector2(Screen.width / 2, Screen.height / 2);
         _yRot = 0.0f;
     }
@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour {
             jumped = false;
         }
 
-        cameraRotation();
+        //cameraRotation();
 
         if (Input.GetMouseButtonDown(0)) {
             blockInteract(true);
@@ -71,12 +71,6 @@ public class PlayerController : MonoBehaviour {
     }
 
     void movement() {
-        //float forwardMovement = Input.GetAxis("Vertical");
-        //float sideMovement = Input.GetAxis("Horizontal");
-        //Vector3 movement = new Vector3(sideMovement, 0, forwardMovement);
-        //rb.AddForce(movement * 100 * playerSpeed * Time.fixedDeltaTime);
-
-
         if (Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S)) {
             rb.AddForce(transform.forward * playerSpeed);
         } else if (Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W)) {
@@ -130,87 +124,86 @@ public class PlayerController : MonoBehaviour {
 
     void blockInteract(bool breaking) {
         RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(crosshair);
-        if (Physics.Raycast(ray, out hit, 5)) {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit)) {
             GameObject awpObject = hit.collider.gameObject;
             if (awpObject.layer == 8) {
+                AngularWP awp = awpObject.GetComponent<AngularWP>();
+                int _x = Mathf.FloorToInt(hit.point.x);
+                int _y = Mathf.FloorToInt(hit.point.y);
+                int _z = Mathf.FloorToInt(hit.point.z);
                 if (breaking && !breakPause) {
-                    int _x = Mathf.FloorToInt(hit.point.x);
-                    int _y = Mathf.FloorToInt(hit.point.y);
-                    int _z = Mathf.FloorToInt(hit.point.z);
-
-                    //destroyVoxel(hit.point.x - Mathf.FloorToInt(swpObject.transform.position.x), hit.point.y, hit.point.z - Mathf.FloorToInt(swpObject.transform.position.z), hit.collider.gameObject.GetComponent<SmoothWP>());
+                    //TerrainModifier.destroyVoxel(_x - Mathf.FloorToInt(awpObject.transform.position.x), _y, _z - Mathf.FloorToInt(awpObject.transform.position.z), hit.collider.gameObject.GetComponent<AngularWP>());
+                    //TerrainModifier.hideVoxel(hit.point.x - Mathf.FloorToInt(awpObject.transform.position.x), hit.point.y, hit.point.z - Mathf.FloorToInt(awpObject.transform.position.z), hit.collider.gameObject.GetComponent<AngularWP>());
                     string cornerValues = "";
                     foreach (int thingy in awpObject.GetComponent<AngularWP>().voxelData[_x - Mathf.FloorToInt(awpObject.transform.position.x), _z - Mathf.FloorToInt(awpObject.transform.position.z), _y].cornersExposed) {
                         cornerValues += thingy + ", ";
                     }
                     print(cornerValues);
+                    TerrainModifier.updateVoxel(_x - Mathf.FloorToInt(awpObject.transform.position.x), _y - 1, _z - Mathf.FloorToInt(awpObject.transform.position.z), awp, true);
                 } else if (!breaking && !placePause) {
-                    int _x = Mathf.FloorToInt(hit.point.x);
-                    int _y = 1 + Mathf.FloorToInt(hit.point.y);
-                    int _z = Mathf.FloorToInt(hit.point.z);
-
-                    placeBlock(hit.point.x - Mathf.FloorToInt(awpObject.transform.position.x), hit.point.y, _z - Mathf.FloorToInt(awpObject.transform.position.z), awpObject.GetComponent<SmoothWP>());
+                    _y++;
+                    TerrainModifier.placeVoxel(_x - Mathf.FloorToInt(awpObject.transform.position.x), _y, _z - Mathf.FloorToInt(awpObject.transform.position.z), awpObject.GetComponent<AngularWP>());
                 }
             }
         }
     }
-    void destroyVoxel(float x, float y, float z, SmoothWP swp) {
-        int _x = Mathf.FloorToInt(x);
-        int _y = Mathf.FloorToInt(y);
-        int _z = Mathf.FloorToInt(z);
-        float scalar = swp.voxelScalar;
-        Vector3[] voxelCorners = new Vector3[] {
-            new Vector3(_x, _y, _z),
-            new Vector3(_x + scalar, _y, _z),
-            new Vector3(_x, _y + scalar, _z),
-            new Vector3(_x + scalar, _y + scalar, _z),
+    //void destroyVoxel(float x, float y, float z, SmoothWP swp) {
+    //    int _x = Mathf.FloorToInt(x);
+    //    int _y = Mathf.FloorToInt(y);
+    //    int _z = Mathf.FloorToInt(z);
+    //    float scalar = swp.voxelScalar;
+    //    Vector3[] voxelCorners = new Vector3[] {
+    //        new Vector3(_x, _y, _z),
+    //        new Vector3(_x + scalar, _y, _z),
+    //        new Vector3(_x, _y + scalar, _z),
+    //        new Vector3(_x + scalar, _y + scalar, _z),
 
-            new Vector3(_x + scalar, _y, _z + scalar),
-            new Vector3(_x + scalar, _y + scalar, _z + scalar),
-            new Vector3(_x, _y, _z + scalar),
-            new Vector3(_x, _y + scalar, _z + scalar)
-        };
-        HashSet<int> corners = swp.data[_x, _z, _y].cornersExposed;
-        Vector3 cursorPosition = new Vector3(x, y, z);
+    //        new Vector3(_x + scalar, _y, _z + scalar),
+    //        new Vector3(_x + scalar, _y + scalar, _z + scalar),
+    //        new Vector3(_x, _y, _z + scalar),
+    //        new Vector3(_x, _y + scalar, _z + scalar)
+    //    };
+    //    HashSet<int> corners = swp.data[_x, _z, _y].cornersExposed;
+    //    Vector3 cursorPosition = new Vector3(x, y, z);
 
-        int cornerSelected = 10;
-        float distance = 1;
+    //    int cornerSelected = 10;
+    //    float distance = 1;
 
-        for (int i = 0; i < voxelCorners.Length; i++) {
-            float newDistance = Vector3.Distance(voxelCorners[i], cursorPosition);
-            if (newDistance < distance && !corners.Contains(i)) {
-                cornerSelected = i;
-                distance = newDistance;
-            }
-        }
+    //    for (int i = 0; i < voxelCorners.Length; i++) {
+    //        float newDistance = Vector3.Distance(voxelCorners[i], cursorPosition);
+    //        if (newDistance < distance && !corners.Contains(i)) {
+    //            cornerSelected = i;
+    //            distance = newDistance;
+    //        }
+    //    }
 
-        if (cornerSelected != 10) {
-            TerrainModifier.removeCorners(_x, _y, _z, cornerSelected, swp);
-        } else {
-            print("No corner able to be selected");
-        }
-        swp.renderMesh();
-        swp.finalize();
-        swp.updatePhysics();
-    }
+    //    if (cornerSelected != 10) {
+    //        TerrainModifier.removeCorners(_x, _y, _z, cornerSelected, swp);
+    //    } else {
+    //        print("No corner able to be selected");
+    //    }
+    //    swp.renderMesh();
+    //    swp.finalize();
+    //    swp.updatePhysics();
+    //}
 
 
-    void placeBlock(float x, float y, float z, SmoothWP swp) {
-        int _x = Mathf.FloorToInt(x);
-        int _y = Mathf.FloorToInt(y);
-        int _z = Mathf.FloorToInt(z);
+    //void placeBlock(float x, float y, float z, SmoothWP swp) {
+    //    int _x = Mathf.FloorToInt(x);
+    //    int _y = Mathf.FloorToInt(y);
+    //    int _z = Mathf.FloorToInt(z);
 
-        if (swp.data[_x, _z, _y].landType == LandType.Air) {
-            print(new Vector3(x, y, z));
-            swp.data[_x, _z, _y].landType = LandType.Dirt;
-            swp.data[_x, _z, _y].position = new Vector3(x, y, z);
-            swp.data[_x, _z, _y].cornersExposed = new HashSet<int> { 1, 3, 7, 5 };
-            //swp.setup();
-            swp.renderMesh();
-            swp.finalize();
-        } else {
-            print("NOT AIR");
-        }
-    }
+    //    if (swp.data[_x, _z, _y].landType == LandType.Air) {
+    //        print(new Vector3(x, y, z));
+    //        swp.data[_x, _z, _y].landType = LandType.Dirt;
+    //        swp.data[_x, _z, _y].position = new Vector3(x, y, z);
+    //        swp.data[_x, _z, _y].cornersExposed = new HashSet<int> { 1, 3, 7, 5 };
+    //        //swp.setup();
+    //        swp.renderMesh();
+    //        swp.finalize();
+    //    } else {
+    //        print("NOT AIR");
+    //    }
+    //}
 }

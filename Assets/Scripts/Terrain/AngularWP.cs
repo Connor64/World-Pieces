@@ -32,7 +32,7 @@ public class AngularWP : MonoBehaviour {
     };
 
     void Start() {
-        
+
     }
     public void setup() {
         GetComponent<MeshRenderer>().material = materials[0];
@@ -75,8 +75,10 @@ public class AngularWP : MonoBehaviour {
                 float scaledZ = z * voxelScalar;
                 for (int y = 0; y < size.y; y++) {
                     float scaledY = y * voxelScalar;
-                    if (voxelData[x, z, y].voxelType != VoxelType.Air && voxelData[x, z, y].cornersExposed != null) {
+                    Voxel currentVoxel = voxelData[x, z, y];
+                    if (currentVoxel.voxelType != VoxelType.Air && currentVoxel.cornersExposed != null && currentVoxel.render == true) {
                         HashSet<int> corners = voxelData[x, z, y].cornersExposed;
+                        HashSet<int> faces = voxelData[x, z, y].facesToRender;
                         int triIndex = 0;
                         foreach (int i in corners) {
                             switch (i) {
@@ -112,17 +114,26 @@ public class AngularWP : MonoBehaviour {
                         if (triIndex > 255 || triIndex < 0) {
                             print(triIndex);
                         }
-                        addVertices(new Vector3(scaledX, scaledY, scaledZ), triangulationTable[triIndex], corners);
+                        addVertices(new Vector3(scaledX, scaledY, scaledZ), triangulationTable[triIndex], faces);
                     }
                 }
             }
         }
     }
 
-    void addVertices(Vector3 position, int[] triStuff, HashSet<int> corners) {
+    void addVertices(Vector3 position, int[] triStuff, HashSet<int> faces) {
         foreach (int i in triStuff) {
-            verts.Add(new Vector3(points[i].x + position.x, points[i].y + position.y, points[i].z + position.z));
+            Vector3 pointPos = points[i];
+            verts.Add(new Vector3(pointPos.x + position.x, pointPos.y + position.y, pointPos.z + position.z));
             tris.Add(verts.Count - 1);
+        }
+        foreach (int f in faces) {
+            foreach (int v in faceTable[f]) {
+                print(v);
+                Vector3 pointPos = points[v];
+                verts.Add(new Vector3(pointPos.x + position.x, pointPos.y + position.y, pointPos.z + position.z));
+                tris.Add(verts.Count - 1);
+            }
         }
     }
 
@@ -141,6 +152,16 @@ public class AngularWP : MonoBehaviour {
         this.position = position;
         transform.position = new Vector3(position.x, 0, position.z);
     }
+
+    // These are all the faces rendering OUTWARD
+    int[][] faceTable = new int[][] {
+        new int[] {1, 7, 3, 3, 7, 5}, // top
+        new int[] {2, 4, 0, 0, 4, 6}, // bottom
+        new int[] {6, 7, 0, 0, 7, 1}, // left
+        new int[] {2, 3, 4, 4, 3, 5}, // right
+        new int[] {4, 5, 6, 6, 5, 7}, // front
+        new int[] {0, 1, 2, 2, 1, 3}, // back
+    };
 
     int[][] triangulationTable = new int[][] {
         new int[] {}, // none
@@ -423,5 +444,5 @@ public class AngularWP : MonoBehaviour {
         new int[] {}, // 1, 3, 5, 7, 0, 2, 6 (nothing)
         new int[] {}, // 1, 3, 5, 7, 0, 2, 4 (nothing)
         new int[] {}, // 1, 3, 5, 7, 0, 2, 4, 6 (nothing)
-    }; 
+    };
 }
